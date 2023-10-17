@@ -1,9 +1,10 @@
-<script>
-    import ClientOnlyComponent from "$lib/ClientOnlyComponent.svelte"
-</script>
-
 <svelte:head>
     <title>Hello World!</title>
 </svelte:head>
 
-<ClientOnlyComponent />
+{#await import("$lib/ClientOnlyComponent.svelte")}
+    <p>Loading...</p>
+{:then ClientOnlyComponent}
+    <p>Loaded!</p>
+    <svelte:component this={ClientOnlyComponent.default} />
+{/await}
