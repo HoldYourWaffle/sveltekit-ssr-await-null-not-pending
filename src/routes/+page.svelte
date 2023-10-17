@@ -6,7 +6,10 @@
     let ClientOnlyComponent: Promise<ComponentType<ClientOnlyComponent>>
     if (browser) {
         ClientOnlyComponent = import("$lib/ClientOnlyComponent.svelte").then((module) => module.default)
-    }
+    } /* else {
+        // Workaround: never resolving promise on the server to force rendering only the pending-state, preventing weird layout shifts
+        ClientOnlyComponent = new Promise(() => {})
+    } */
 </script>
 
 <svelte:head>
