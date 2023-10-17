@@ -1,30 +1,29 @@
 <script lang="ts">
-    import type { ComponentType } from "svelte"
     import { browser } from "$app/environment"
-    import type ClientOnlyComponent from "$lib/ClientOnlyComponent.svelte"
+    import { doClientOnlyShenanigans } from '$lib/client-only'
 
-    let ClientOnlyComponent: Promise<ComponentType<ClientOnlyComponent>>
+    let clientOnlyPromise: Promise<string>
     if (browser) {
-        ClientOnlyComponent = import("$lib/ClientOnlyComponent.svelte").then((module) => module.default)
-    } /* else {
-        // Workaround: never resolving promise on the server to force rendering only the pending-state, preventing weird layout shifts
-        ClientOnlyComponent = new Promise(() => {})
-    } */
+        clientOnlyPromise = doClientOnlyShenanigans()
+    } /*else {
+        // Workaround: never resolving promise on the server to force rendering only the pending-state
+        clientOnlyPromise = new Promise(() => {})
+    }*/
 </script>
 
-<svelte:head>
-    <title>Hello World!</title>
-</svelte:head>
-
 <!--
-    FIXME during SSR ClientOnlyComponent will remain undefined
+    FIXME: during SSR clientOnlyPromise will remain undefined
     This renders the fullfiled branch of the await block,
     even though the documentation explicitly states that only the pending state will be rendered on the server.
     See: https://svelte.dev/docs/logic-blocks#await
+
+    In this example this causes a flash of "undefined" on the page before hydration.
+    In real world applications this can cause much more severe issues like layout shifts :(
 -->
-{#await ClientOnlyComponent}
+
+{#await clientOnlyPromise}
     <p>Loading...</p>
-{:then ClientOnlyComponent}
+{:then clientOnlyValue}
     <p>Loaded!</p>
-    <svelte:component this={ClientOnlyComponent} />
+    {clientOnlyValue}
 {/await}
